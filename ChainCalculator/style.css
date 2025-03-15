@@ -1,0 +1,30 @@
+body{
+    display: flex;
+    justify-content: center;
+}
+
+.Cal{
+    width: fit-content;
+    padding: 10px;
+    border: 2px solid black;
+}
+
+.frame{
+    width: 130px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
+}
+
+.button{
+    width: 25px;
+}
+
+#value{
+    display: block;
+    width: 130px;
+    padding: 10px;
+    text-align: center;
+    border: 1px solid black;
+}

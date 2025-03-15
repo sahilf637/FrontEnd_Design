@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chain Calculator</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f5f5f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .calculator {
+      background-color: #333;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      width: 320px;
+    }
+    
+    .display {
+      background-color: #222;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      padding: 15px;
+      text-align: right;
+      position: relative;
+    }
+    
+    .previous-operation {
+      color: #aaa;
+      font-size: 14px;
+      min-height: 18px;
+      margin-bottom: 5px;
+      word-wrap: break-word;
+      max-width: 100%;
+      overflow: hidden;
+    }
+    
+    .current-value {
+      color: white;
+      font-size: 36px;
+      font-weight: 300;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-gap: 12px;
+    }
+    
+    button {
+      background-color: #555;
+      border: none;
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      font-size: 20px;
+      height: 60px;
+      transition: background-color 0.2s;
+      width: 60px;
+    }
+    
+    button:hover {
+      background-color: #666;
+    }
+    
+    button:active {
+      background-color: #777;
+    }
+    
+    button.operator {
+      background-color: #ff9500;
+      font-weight: bold;
+    }
+    
+    button.operator:hover {
+      background-color: #ffaa33;
+    }
+    
+    button.function {
+      background-color: #444;
+    }
+    
+    button.function:hover {
+      background-color: #555;
+    }
+    
+    button.equals {
+      background-color: #008aff;
+      grid-column: span 2;
+      border-radius: 30px;
+      width: 100%;
+    }
+    
+    button.equals:hover {
+      background-color: #0099ff;
+    }
+    
+    button.zero {
+      grid-column: span 2;
+      border-radius: 30px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div class="display">
+      <div class="previous-operation"></div>
+      <div class="current-value">0</div>
+    </div>
+    <div class="buttons">
+      <button class="function" onclick="clearAll()">AC</button>
+      <button class="function" onclick="toggleSign()">+/-</button>
+      <button class="function" onclick="percentage()">%</button>
+      <button class="operator" onclick="setOperation('÷')">÷</button>
+      
+      <button onclick="appendNumber('7')">7</button>
+      <button onclick="appendNumber('8')">8</button>
+      <button onclick="appendNumber('9')">9</button>
+      <button class="operator" onclick="setOperation('×')">×</button>
+      
+      <button onclick="appendNumber('4')">4</button>
+      <button onclick="appendNumber('5')">5</button>
+      <button onclick="appendNumber('6')">6</button>
+      <button class="operator" onclick="setOperation('-')">-</button>
+      
+      <button onclick="appendNumber('1')">1</button>
+      <button onclick="appendNumber('2')">2</button>
+      <button onclick="appendNumber('3')">3</button>
+      <button class="operator" onclick="setOperation('+')">+</button>
+      
+      <button class="zero" onclick="appendNumber('0')">0</button>
+      <button onclick="appendDecimal()">.</button>
+      <button class="equals" onclick="calculate()">=</button>
+    </div>
+  </div>
+
+  <script>
+    let currentValue = '0';
+    let previousValue = '';
+    let operation = null;
+    let resetScreen = false;
+    let chainCalculation = true;
+    
+    const currentValueElement = document.querySelector('.current-value');
+    const previousOperationElement = document.querySelector('.previous-operation');
+    
+    function updateDisplay() {
+      currentValueElement.textContent = currentValue;
+      
+      if (operation) {
+        previousOperationElement.textContent = `${previousValue} ${operation}`;
+      } else if (previousValue && !operation) {
+        previousOperationElement.textContent = `${previousValue} =`;
+      } else {
+        previousOperationElement.textContent = '';
+      }
+    }
+    
+    function appendNumber(number) {
+      if (currentValue === '0' || resetScreen) {
+        currentValue = number;
+        resetScreen = false;
+      } else if (currentValue.length < 12) {
+        currentValue += number;
+      }
+      updateDisplay();
+    }
+    
+    function appendDecimal() {
+      if (resetScreen) {
+        currentValue = '0.';
+        resetScreen = false;
+      } else if (!currentValue.includes('.')) {
+        currentValue += '.';
+      }
+      updateDisplay();
+    }
+    
+    function clearAll() {
+      currentValue = '0';
+      previousValue = '';
+      operation = null;
+      updateDisplay();
+    }
+    
+    function toggleSign() {
+      currentValue = (parseFloat(currentValue) * -1).toString();
+      updateDisplay();
+    }
+    
+    function percentage() {
+      currentValue = (parseFloat(currentValue) / 100).toString();
+      updateDisplay();
+    }
+    
+    function setOperation(op) {
+      if (operation && !resetScreen) {
+        calculate();
+      }
+      
+      previousValue = currentValue;
+      operation = op;
+      resetScreen = true;
+      updateDisplay();
+    }
+    
+    function calculate() {
+      if (!operation || resetScreen) return;
+      
+      const prev = parseFloat(previousValue);
+      const current = parseFloat(currentValue);
+      let result;
+      
+      switch (operation) {
+        case '+':
+          result = prev + current;
+          break;
+        case '-':
+          result = prev - current;
+          break;
+        case '×':
+          result = prev * current;
+          break;
+        case '÷':
+          if (current === 0) {
+            result = 'Error';
+          } else {
+            result = prev / current;
+          }
+          break;
+        default:
+          return;
+      }
+      
+      if (result === 'Error') {
+        currentValue = result;
+      } else {
+        // Format the result to avoid extremely long decimals
+        currentValue = parseFloat(result.toFixed(10)).toString();
+        // Remove trailing zeros after decimal point
+        if (currentValue.includes('.')) {
+          currentValue = currentValue.replace(/\.?0+$/, '');
+        }
+      }
+      
+      if (chainCalculation) {
+        previousValue = currentValue;
+        operation = null;
+      }
+      
+      resetScreen = true;
+      updateDisplay();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chain Calculator</title>
+  <style>
+    /* Reset and basic styling */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    .calculator {
+      background: #333;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      width: 320px;
+      padding: 20px;
+    }
+    .display {
+      background: #000;
+      color: #0f0;
+      font-size: 2em;
+      text-align: right;
+      padding: 20px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      min-height: 50px;
+      word-wrap: break-word;
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-gap: 10px;
+    }
+    .buttons button {
+      background: #444;
+      color: #fff;
+      border: none;
+      padding: 20px;
+      font-size: 1.2em;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .buttons button:hover {
+      background: #555;
+    }
+    .buttons button:active {
+      background: #666;
+    }
+    .buttons button.zero {
+      grid-column: span 2;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div id="display" class="display">0</div>
+    <div class="buttons">
+      <button data-action="clear">C</button>
+      <button data-action="operator" data-value="/">÷</button>
+      <button data-action="operator" data-value="*">×</button>
+      <button data-action="operator" data-value="-">−</button>
+      
+      <button data-action="number" data-value="7">7</button>
+      <button data-action="number" data-value="8">8</button>
+      <button data-action="number" data-value="9">9</button>
+      <button data-action="operator" data-value="+">+</button>
+      
+      <button data-action="number" data-value="4">4</button>
+      <button data-action="number" data-value="5">5</button>
+      <button data-action="number" data-value="6">6</button>
+      <button data-action="equals">=</button>
+      
+      <button data-action="number" data-value="1">1</button>
+      <button data-action="number" data-value="2">2</button>
+      <button data-action="number" data-value="3">3</button>
+      <button data-action="number" data-value="0" class="zero">0</button>
+      
+      <button data-action="number" data-value=".">.</button>
+    </div>
+  </div>
+  
+  <script>
+    (function() {
+      const display = document.getElementById('display');
+      const buttons = document.querySelectorAll('.buttons button');
+      
+      let currentInput = '';
+      let previousValue = null;
+      let operator = null;
+      let resetDisplay = false;
+      
+      // Update the calculator display
+      function updateDisplay(value) {
+        display.textContent = value;
+      }
+      
+      // Append number or decimal to the display
+      function appendNumber(number) {
+        if (resetDisplay) {
+          currentInput = '';
+          resetDisplay = false;
+        }
+        // Prevent more than one decimal point
+        if (number === '.' && currentInput.includes('.')) return;
+        currentInput += number;
+        updateDisplay(currentInput);
+      }
+      
+      // Choose an operator and set up chaining
+      function chooseOperator(op) {
+        if (currentInput === '' && previousValue === null) return;
+        // If an operator is already selected, compute the result first
+        if (operator && !resetDisplay) {
+          compute();
+        } else if (currentInput !== '') {
+          previousValue = parseFloat(currentInput);
+        }
+        operator = op;
+        resetDisplay = true;
+      }
+      
+      // Compute the result based on the selected operator
+      function compute() {
+        if (operator === null || currentInput === '') return;
+        const current = parseFloat(currentInput);
+        let result;
+        switch (operator) {
+          case '+':
+            result = previousValue + current;
+            break;
+          case '-':
+            result = previousValue - current;
+            break;
+          case '*':
+            result = previousValue * current;
+            break;
+          case '/':
+            result = current === 0 ? 'Error' : previousValue / current;
+            break;
+          default:
+            return;
+        }
+        updateDisplay(result);
+        previousValue = result === 'Error' ? null : result;
+        currentInput = result.toString();
+        operator = null;
+        resetDisplay = true;
+      }
+      
+      // Clear all states
+      function clearAll() {
+        currentInput = '';
+        previousValue = null;
+        operator = null;
+        updateDisplay('0');
+      }
+      
+      // Add event listeners for each button
+      buttons.forEach(button => {
+        button.addEventListener('click', () => {
+          const action = button.getAttribute('data-action');
+          const value = button.getAttribute('data-value');
+          
+          if (action === 'number') {
+            appendNumber(value);
+          }
+          if (action === 'operator') {
+            chooseOperator(value);
+          }
+          if (action === 'equals') {
+            compute();
+          }
+          if (action === 'clear') {
+            clearAll();
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
